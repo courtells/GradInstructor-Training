@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA Training — Music Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   THEME TOKENS — change colors, fonts, spacing here
+   ============================================================ */
+:root{
+  --navy:        #002E5D;
+  --navy-ink:     #001d3d;   /* darker navy for hover/pressed states */
+  --navy-mist:    #eef2f6;   /* navy tinted background wash */
+  --white:       #ffffff;
+  --grey-50:     #f6f7f8;
+  --grey-100:    #eceef0;
+  --grey-300:    #d4d8dc;
+  --grey-500:    #8a9099;
+  --grey-700:    #4b5158;
+  --black:       #14171a;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --sidebar-w: 300px;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0,20,50,.06), 0 8px 24px -12px rgba(0,20,50,.12);
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--black);
+  background:var(--grey-50);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ font-family:var(--font-display); margin:0; }
+p{ margin:0; }
+button{ font-family:inherit; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+.app{ display:flex; min-height:100vh; }
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:var(--sidebar-w);
+  flex-shrink:0;
+  background:var(--navy);
+  color:var(--white);
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow-y:auto;
+}
+.sidebar-header{
+  padding:28px 24px 20px;
+  border-bottom:1px solid rgba(255,255,255,.14);
+}
+.sidebar-eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.55);
+  margin-bottom:8px;
+}
+.sidebar-title{
+  font-size:22px;
+  font-weight:600;
+  line-height:1.2;
+}
+.sidebar-sub{
+  font-size:13px;
+  color:rgba(255,255,255,.65);
+  margin-top:6px;
+}
+
+/* ---- progress staff: a five-line staff where each module is a
+       notehead — filled once that module is marked complete ---- */
+.progress-staff-wrap{ padding:18px 24px 14px; border-bottom:1px solid rgba(255,255,255,.14); }
+.progress-label{
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:rgba(255,255,255,.5); margin-bottom:10px;
+}
+.progress-staff{ width:100%; display:block; }
+.staff-line{ stroke:rgba(255,255,255,.28); stroke-width:1; }
+.note{ fill:transparent; stroke:rgba(255,255,255,.7); stroke-width:1.6; cursor:default; transition:fill .25s ease, stroke .25s ease; }
+.note.done{ fill:#ffffff; stroke:#ffffff; }
+.note-stem{ stroke:rgba(255,255,255,.55); stroke-width:1.4; }
+.note-stem.done{ stroke:#ffffff; }
+
+.module-nav{ list-style:none; margin:0; padding:10px 12px 24px; flex:1; }
+.module-link{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  width:100%;
+  text-align:left;
+  padding:12px 12px;
+  border-radius:8px;
+  border:none;
+  background:transparent;
+  color:rgba(255,255,255,.82);
+  cursor:pointer;
+  transition:background .15s ease, color .15s ease;
+}
+.module-link:hover{ background:rgba(255,255,255,.08); color:var(--white); }
+.module-link.active{ background:var(--white); color:var(--navy); }
+.module-link.active .module-num{ color:var(--navy); opacity:.55; }
+.module-link.active .module-time{ color:var(--navy); opacity:.6; }
+
+.module-num{
+  font-family:var(--font-mono);
+  font-size:12px;
+  opacity:.55;
+  padding-top:2px;
+  min-width:20px;
+}
+.module-link-text{ flex:1; min-width:0; }
+.module-name{ font-size:14.5px; font-weight:600; line-height:1.35; }
+.module-time{ font-family:var(--font-mono); font-size:11px; opacity:.55; margin-top:3px; }
+.module-check{
+  width:16px; height:16px; border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.5);
+  margin-top:3px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.module-link.active .module-check{ border-color:var(--navy); }
+.module-check.done{ background:var(--navy); border-color:var(--navy); }
+.module-link.active .module-check.done{ background:var(--navy); border-color:var(--navy); }
+.module-check.done svg{ stroke:var(--white); }
+.module-check svg{ width:9px; height:9px; stroke:transparent; stroke-width:3; fill:none; }
+
+.sidebar-footer{
+  padding:16px 24px 22px;
+  border-top:1px solid rgba(255,255,255,.14);
+  font-size:12px;
+  color:rgba(255,255,255,.45);
+}
+
+/* ---------- Main content ---------- */
+.main{ flex:1; min-width:0; display:flex; justify-content:center; }
+.content{ width:100%; max-width:760px; padding:56px 40px 120px; }
+
+.module-header{ margin-bottom:36px; }
+.module-eyebrow{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--navy); opacity:.7; margin-bottom:10px;
+  display:flex; align-items:center; gap:10px;
+}
+.module-eyebrow .dot{ width:4px; height:4px; border-radius:50%; background:var(--grey-500); }
+.module-header h1{ font-size:36px; font-weight:600; color:var(--black); line-height:1.15; }
+.module-dek{ font-size:16px; color:var(--grey-700); margin-top:12px; line-height:1.6; max-width:56ch; }
+
+/* staff-line divider used under the module header — the recurring
+   motif that ties the page back to a music staff */
+.staff-divider{ margin:28px 0 8px; opacity:.9; }
+.staff-divider svg{ width:100%; height:14px; display:block; }
+.staff-divider line{ stroke:var(--grey-300); stroke-width:1; }
+
+/* ---------- content blocks ---------- */
+.block{ margin:26px 0; }
+.block-heading{
+  font-family:var(--font-display); font-size:20px; font-weight:600;
+  color:var(--navy); margin-bottom:10px;
+}
+.block-paragraph{ font-size:15.5px; line-height:1.75; color:#25292e; }
+.block-paragraph + .block-paragraph{ margin-top:12px; }
+
+.block-list{ margin:0; padding-left:0; list-style:none; }
+.block-list li{
+  display:flex; gap:12px; font-size:15px; line-height:1.65; color:#25292e;
+  padding:7px 0;
+}
+.block-list.ordered li .marker{ font-family:var(--font-mono); color:var(--navy); font-weight:600; min-width:22px; }
+.block-list.bulleted li .marker{ color:var(--navy); font-weight:700; min-width:14px; }
+
+.callout{
+  display:flex; gap:14px; padding:16px 18px; border-radius:var(--radius);
+  border:1px solid var(--grey-300); background:var(--white);
+}
+.callout.tip{ background:var(--navy-mist); border-color:#d7e2ec; }
+.callout.warning{ background:#fbf6ee; border-color:#ecdfc6; }
+.callout-icon{ flex-shrink:0; width:20px; height:20px; margin-top:2px; }
+.callout-icon svg{ width:20px; height:20px; }
+.callout.tip .callout-icon svg{ stroke:var(--navy); }
+.callout.warning .callout-icon svg{ stroke:#8a5a00; }
+.callout-body .callout-label{
+  font-family:var(--font-mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+  font-weight:600; margin-bottom:4px; color:var(--navy);
+}
+.callout.warning .callout-label{ color:#8a5a00; }
+.callout-body p{ font-size:14.5px; line-height:1.65; color:#25292e; }
+
+.checklist{ border:1px solid var(--grey-300); border-radius:var(--radius); overflow:hidden; background:var(--white); }
+.checklist-item{
+  display:flex; align-items:flex-start; gap:12px;
+  padding:13px 16px; border-bottom:1px solid var(--grey-100); cursor:pointer;
+}
+.checklist-item:last-child{ border-bottom:none; }
+.checklist-item:hover{ background:var(--grey-50); }
+.checklist-box{
+  width:18px; height:18px; border-radius:5px; border:1.5px solid var(--grey-500);
+  flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center;
+  transition:background .15s ease, border-color .15s ease;
+}
+.checklist-box.checked{ background:var(--navy); border-color:var(--navy); }
+.checklist-box svg{ width:10px; height:10px; stroke:var(--white); stroke-width:3; fill:none; opacity:0; }
+.checklist-box.checked svg{ opacity:1; }
+.checklist-text{ font-size:14.5px; line-height:1.55; color:#25292e; }
+.checklist-item.checked .checklist-text{ color:var(--grey-500); text-decoration:line-through; text-decoration-color:var(--grey-300); }
+
+.quote{
+  border-left:3px solid var(--navy); padding:4px 0 4px 18px; margin:26px 0;
+}
+.quote p{ font-family:var(--font-display); font-size:18px; font-style:italic; color:var(--black); line-height:1.55; }
+.quote-attr{ font-family:var(--font-mono); font-size:12px; color:var(--grey-500); margin-top:8px; }
+
+/* ---------- footer nav / complete control ---------- */
+.module-footer{
+  margin-top:52px; padding-top:28px; border-top:1px solid var(--grey-300);
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.complete-btn{
+  display:flex; align-items:center; gap:10px;
+  background:var(--navy); color:var(--white); border:none;
+  padding:12px 20px; border-radius:8px; font-size:14px; font-weight:600;
+  cursor:pointer; transition:background .15s ease;
+}
+.complete-btn:hover{ background:var(--navy-ink); }
+.complete-btn.done{ background:var(--white); color:var(--navy); border:1.5px solid var(--navy); }
+.complete-btn svg{ width:16px; height:16px; stroke:currentColor; stroke-width:2.5; fill:none; }
+
+.step-nav{ display:flex; gap:10px; }
+.step-btn{
+  display:flex; align-items:center; gap:8px;
+  background:var(--white); border:1px solid var(--grey-300); color:var(--black);
+  padding:10px 16px; border-radius:8px; font-size:13.5px; font-weight:600; cursor:pointer;
+  transition:border-color .15s ease, background .15s ease;
+}
+.step-btn:hover{ border-color:var(--navy); background:var(--navy-mist); }
+.step-btn:disabled{ opacity:.35; cursor:not-allowed; }
+.step-btn:disabled:hover{ border-color:var(--grey-300); background:var(--white); }
+
+/* ---------- mobile ---------- */
+.menu-toggle{ display:none; }
+@media (max-width: 880px){
+  .app{ flex-direction:column; }
+  .sidebar{ width:100%; height:auto; position:relative; }
+  .sidebar.collapsed .module-nav,
+  .sidebar.collapsed .progress-staff-wrap,
+  .sidebar.collapsed .sidebar-footer{ display:none; }
+  .menu-toggle{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,.1); border:none; color:var(--white);
+    padding:8px 12px; border-radius:7px; font-size:12.5px; font-weight:600;
+    margin-top:14px; cursor:pointer;
+  }
+  .content{ padding:36px 22px 90px; }
+  .module-header h1{ font-size:28px; }
+}
+
+/* focus visibility */
+a:focus-visible, button:focus-visible{
+  outline:2px solid var(--navy); outline-offset:2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============================================================
+       SIDEBAR — module list, generated from the MODULES array below
+       ============================================================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-eyebrow">TA Onboarding</div>
+      <h1 class="sidebar-title">Music Program<br>Training</h1>
+      <p class="sidebar-sub">A short course for new teaching assistants.</p>
+      <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="sidebar">
+        <span id="menuToggleLabel">Show modules</span>
+      </button>
+    </div>
+
+    <div class="progress-staff-wrap">
+      <div class="progress-label" id="progressLabel">0 of 6 complete</div>
+      <svg class="progress-staff" id="progressStaff" viewBox="0 0 252 40" preserveAspectRatio="xMinYMid meet"></svg>
+    </div>
+
+    <ul class="module-nav" id="moduleNav"></ul>
+
+    <div class="sidebar-footer">
+      Progress is saved on this device.<br>Questions go to your lead instructor.
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN — active module renders here
+       ============================================================ -->
+  <main class="main">
+    <div class="content" id="content"></div>
+  </main>
+
+</div>
+
+<script>
+/* ================================================================
+   HOW TO EDIT THIS TRAINING SITE
+   ================================================================
+   Everything below is one JavaScript array called MODULES.
+   Each object in the array is one training module / sidebar entry.
+
+   TO ADD A NEW MODULE:
+     Copy an existing module object, paste it into the array,
+     give it a unique "id", and edit the fields.
+
+   TO REORDER MODULES:
+     Just reorder the objects in the array — the numbering,
+     progress staff, and prev/next buttons all update automatically.
+
+   TO REMOVE A MODULE:
+     Delete its object from the array.
+
+   MODULE FIELDS:
+     id        — unique short string, no spaces (used for saving progress)
+     title     — module name shown in the sidebar and page header
+     time      — estimated duration, e.g. "8 min"
+     dek       — one-sentence summary shown under the title
+     sections  — an array of content blocks, rendered top to bottom
+
+   SECTION TYPES (put these objects inside "sections"):
+
+     { type: "heading", text: "..." }
+        A sub-heading within the module.
+
+     { type: "paragraph", text: "..." }
+        A paragraph of body text. You can also pass an array of
+        strings to "text" to render several paragraphs at once.
+
+     { type: "list", style: "ordered" | "bulleted", items: ["...", "..."] }
+        A numbered or bulleted list.
+
+     { type: "callout", variant: "tip" | "warning", label: "...", text: "..." }
+        A highlighted note or warning box.
+
+     { type: "checklist", items: ["...", "..."] }
+        An interactive checklist. Checked state is saved per module.
+
+     { type: "quote", text: "...", attribution: "..." }
+        A pulled quote, e.g. program philosophy or a lead instructor tip.
+
+   That's the whole system — no build step, just edit MODULES and
+   save the file, then refresh the page in a browser.
+   ================================================================ */
+
+const MODULES = [
+  {
+    id: "welcome",
+    title: "Welcome to the Program",
+    time: "6 min",
+    dek: "What the ensemble program stands for, and where you fit in as a TA.",
+    sections: [
+      { type: "paragraph", text: "Welcome — we're glad you're joining the music program as a teaching assistant. This module covers what the program values, how TAs support the lead instructor, and what a typical week looks like." },
+      { type: "heading", text: "What TAs actually do" },
+      { type: "paragraph", text: "You're not a substitute teacher and you're not just an extra pair of hands. You're the person students feel comfortable asking a 'small' question, the one who notices when someone's struggling with a passage before it becomes a bigger problem, and the one who keeps rehearsal running while the instructor works one-on-one with a section." },
+      { type: "list", style: "bulleted", items: [
+        "Help set up and break down the room before and after class",
+        "Support individual students or small sections during rehearsal",
+        "Take attendance and light notes on progress for the instructor",
+        "Model rehearsal etiquette — you set the tone as much as anyone"
+      ]},
+      { type: "quote", text: "Students remember how a room felt more than what was said in it. Your energy sets the room.", attribution: "— Program handbook, Section 1" },
+      { type: "callout", variant: "tip", label: "Before your first session", text: "Introduce yourself to the lead instructor at least 10 minutes before class and ask how they'd like you to handle latecomers and instrument checkout that day." }
+    ]
+  },
+  {
+    id: "culture",
+    title: "Classroom Culture & Communication",
+    time: "9 min",
+    dek: "How to talk with students, handle mistakes, and keep rehearsal encouraging.",
+    sections: [
+      { type: "paragraph", text: "Music classrooms mix performance pressure with group learning, which means how you communicate matters as much as what you know about the material." },
+      { type: "heading", text: "Giving feedback in the moment" },
+      { type: "paragraph", text: [
+          "Keep feedback specific and actionable. 'Try that again' teaches nothing — 'slow down measure 12, your bow is rushing ahead of the beat' gives the student something to fix.",
+          "Lead with what's working before naming what to adjust. Students are far more likely to try again if the first thing they hear isn't a correction."
+        ]
+      },
+      { type: "list", style: "ordered", items: [
+        "Name one specific thing that's working",
+        "Name one specific thing to adjust",
+        "Give a concrete way to practice it (slower tempo, isolate the phrase, clap the rhythm)",
+        "Let them try it again right away, while it's fresh"
+      ]},
+      { type: "callout", variant: "warning", label: "Avoid", text: "Comparing students to each other, even lightly ('see how well she's doing it'). It reads as pressure, not encouragement, and it can shut a student down for the rest of class." },
+      { type: "heading", text: "When a student is struggling emotionally" },
+      { type: "paragraph", text: "If a student seems frustrated, embarrassed, or upset, step aside with them quietly rather than addressing it in front of the group. Your job is to de-escalate, not diagnose — loop in the lead instructor if it continues past that session." }
+    ]
+  },
+  {
+    id: "equipment",
+    title: "Instrument & Equipment Care",
+    time: "7 min",
+    dek: "Checkout procedures, storage, and what counts as TA-level maintenance.",
+    sections: [
+      { type: "paragraph", text: "Program instruments are shared across many students and cost real money to repair. Part of your role is protecting them without making students afraid to touch them." },
+      { type: "heading", text: "Checkout & return" },
+      { type: "checklist", items: [
+        "Log the student's name and instrument tag number at checkout",
+        "Do a quick visual check for existing damage before handing it over",
+        "Remind students where cases and stands go at the end of class",
+        "Flag anything that looks damaged before it leaves the room, not after"
+      ]},
+      { type: "heading", text: "What you can fix vs. what to report" },
+      { type: "list", style: "bulleted", items: [
+        "Loose reeds, slipped mutes, or a dropped stand — handle it yourself",
+        "Sticking valves, buzzing strings, or a cracked reed — send the student to the instrument closet, don't attempt a repair",
+        "Anything structural (cracks, bent brass, broken strings mid-class) — report to the lead instructor immediately, don't try to keep using it"
+      ]},
+      { type: "callout", variant: "tip", label: "Good habit", text: "Keep a small notepad or note on your phone of anything you flagged during class, so it doesn't get forgotten by the next session." }
+    ]
+  },
+  {
+    id: "management",
+    title: "Rehearsal & Classroom Management",
+    time: "8 min",
+    dek: "Keeping a room of musicians focused without killing the energy.",
+    sections: [
+      { type: "paragraph", text: "Rehearsal rooms are loud and full of transitions — between pieces, between sections, between full-group and small-group work. Most classroom management here is about smoothing those transitions, not enforcing quiet." },
+      { type: "heading", text: "Getting attention without shouting over instruments" },
+      { type: "list", style: "ordered", items: [
+        "Use the agreed-upon signal (raised hand, played chord, etc.) rather than raising your voice over the group",
+        "Wait for full quiet before giving instructions — repeating yourself over noise trains students to tune you out",
+        "Keep instructions short; long explanations lose a room fast"
+      ]},
+      { type: "heading", text: "Small-group and sectional support" },
+      { type: "paragraph", text: "When the lead instructor sends you off with a section, you're not just supervising — you're actively coaching. Have the section run the passage once so you can hear where the real issue is before jumping in with fixes." },
+      { type: "callout", variant: "tip", label: "Time management", text: "Set a rough time limit for sectional work before you start (e.g. '8 minutes on this passage') so you don't accidentally eat into the full-group rehearsal time." }
+    ]
+  },
+  {
+    id: "assessment",
+    title: "Grading & Feedback Support",
+    time: "6 min",
+    dek: "How TAs support assessment without setting the grading standard.",
+    sections: [
+      { type: "paragraph", text: "You'll often be asked to help with practice logs, playing tests, or written feedback — but the lead instructor sets the standard. Your role is consistent, useful input, not final grades." },
+      { type: "list", style: "bulleted", items: [
+        "Use the rubric provided for the assignment — don't improvise your own criteria",
+        "Write feedback a student could actually act on, not just a score",
+        "Flag anything borderline to the instructor instead of deciding it yourself",
+        "Keep notes factual ('rushed the eighth-note run in m.14') rather than evaluative ('not ready')"
+      ]},
+      { type: "callout", variant: "warning", label: "Stay in your lane", text: "Never change a grade the instructor has already given, even if a student asks you to during class. Direct grade disputes to the instructor." },
+      { type: "quote", text: "Good feedback tells a student what to do next practice session. A number alone never does that.", attribution: "— Program handbook, Section 4" }
+    ]
+  },
+  {
+    id: "safety",
+    title: "Safety, Emergencies & Reporting",
+    time: "10 min",
+    dek: "What to do in an emergency, and how to report concerns properly.",
+    sections: [
+      { type: "paragraph", text: "This is the one module every TA should know cold, even if nothing here ever comes up during your time in the program." },
+      { type: "heading", text: "In an emergency" },
+      { type: "list", style: "ordered", items: [
+        "Student safety comes first — pause rehearsal immediately if needed",
+        "Know the building's evacuation route and the nearest emergency exit before your first session",
+        "Call campus/building security or emergency services if there's any doubt",
+        "Notify the lead instructor and program coordinator as soon as it's safe to do so"
+      ]},
+      { type: "callout", variant: "warning", label: "Mandatory reporting", text: "If a student discloses something involving abuse, self-harm, or safety at home, do not try to handle it yourself. Report it to the lead instructor and program coordinator the same day, following your institution's reporting policy." },
+      { type: "heading", text: "Everyday reporting" },
+      { type: "paragraph", text: "Not everything is an emergency, but most things are worth a note. Minor injuries, equipment damage, a student who seems consistently withdrawn — write it down and pass it along at the end of class rather than letting it go unrecorded." },
+      { type: "checklist", items: [
+        "Know the emergency exit and meeting point for your room",
+        "Save the program coordinator's phone number in your phone",
+        "Know where the first-aid kit is kept",
+        "Review your institution's mandatory reporting policy"
+      ]}
+    ]
+  }
+];
+
+/* ================================================================
+   RENDERING ENGINE — you shouldn't need to edit below this line
+   ================================================================ */
+
+const STORAGE_KEY = "ta-training-progress-v1";
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { complete:{}, checklist:{} }; }
+  catch(e){ return { complete:{}, checklist:{} }; }
+}
+function saveProgress(state){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let progress = loadProgress();
+let activeIndex = 0;
+
+const ICONS = {
+  check: '<svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7"/></svg>',
+  tip: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2Z"/></svg>',
+  warning: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg>',
+  arrowRight: '<svg viewBox="0 0 16 16" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>'
+};
+
+function renderProgressStaff(){
+  const svg = document.getElementById("progressStaff");
+  const n = MODULES.length;
+  const w = 252, h = 40;
+  const lineGap = 8, topLine = 8;
+  let lines = "";
+  for(let i=0;i<5;i++){
+    const y = topLine + i*lineGap;
+    lines += `<line class="staff-line" x1="0" y1="${y}" x2="${w}" y2="${y}"></line>`;
+  }
+  let notes = "";
+  const usableW = w - 24;
+  const step = n > 1 ? usableW/(n-1) : 0;
+  MODULES.forEach((m,i)=>{
+    const done = !!progress.complete[m.id];
+    const cx = 12 + step*i;
+    const cy = topLine + 16 + ((i%3)-1)*4; // slight vertical variety like real notation
+    notes += `<line class="note-stem ${done?'done':''}" x1="${cx+5.5}" y1="${cy}" x2="${cx+5.5}" y2="${cy-16}"></line>`;
+    notes += `<ellipse class="note ${done?'done':''}" cx="${cx}" cy="${cy}" rx="5.5" ry="4"></ellipse>`;
+  });
+  svg.innerHTML = lines + notes;
+
+  const doneCount = MODULES.filter(m=>progress.complete[m.id]).length;
+  document.getElementById("progressLabel").textContent = `${doneCount} of ${MODULES.length} complete`;
+}
+
+function renderNav(){
+  const nav = document.getElementById("moduleNav");
+  nav.innerHTML = "";
+  MODULES.forEach((m,i)=>{
+    const li = document.createElement("li");
+    const done = !!progress.complete[m.id];
+    li.innerHTML = `
+      <button class="module-link ${i===activeIndex?'active':''}" data-index="${i}">
+        <span class="module-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="module-link-text">
+          <span class="module-name">${m.title}</span>
+          <span class="module-time">${m.time}</span>
+        </span>
+        <span class="module-check ${done?'done':''}">${done?ICONS.check:''}</span>
+      </button>`;
+    nav.appendChild(li);
+  });
+  nav.querySelectorAll(".module-link").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      activeIndex = parseInt(btn.dataset.index,10);
+      renderAll();
+      window.scrollTo({top:0, behavior:"smooth"});
+      if(window.innerWidth <= 880) collapseSidebar(true);
+    });
+  });
+}
+
+function renderSection(section, moduleId, idx){
+  switch(section.type){
+    case "heading":
+      return `<div class="block"><h2 class="block-heading">${section.text}</h2></div>`;
+
+    case "paragraph": {
+      const paras = Array.isArray(section.text) ? section.text : [section.text];
+      return `<div class="block">${paras.map(t=>`<p class="block-paragraph">${t}</p>`).join("")}</div>`;
+    }
+
+    case "list": {
+      const ordered = section.style === "ordered";
+      const items = section.items.map((t,i)=>`
+        <li><span class="marker">${ordered ? (i+1)+"." : "—"}</span><span>${t}</span></li>
+      `).join("");
+      return `<div class="block"><ul class="block-list ${ordered?'ordered':'bulleted'}">${items}</ul></div>`;
+    }
+
+    case "callout": {
+      const variant = section.variant === "warning" ? "warning" : "tip";
+      const icon = variant === "warning" ? ICONS.warning : ICONS.tip;
+      return `
+        <div class="block">
+          <div class="callout ${variant}">
+            <span class="callout-icon">${icon}</span>
+            <div class="callout-body">
+              <div class="callout-label">${section.label || (variant==="warning"?"Heads up":"Tip")}</div>
+              <p>${section.text}</p>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    case "checklist": {
+      const key = moduleId+"-"+idx;
+      const state = progress.checklist[key] || [];
+      const items = section.items.map((t,i)=>{
+        const checked = state.includes(i);
+        return `
+          <div class="checklist-item ${checked?'checked':''}" data-key="${key}" data-i="${i}">
+            <span class="checklist-box ${checked?'checked':''}">${ICONS.check}</span>
+            <span class="checklist-text">${t}</span>
+          </div>`;
+      }).join("");
+      return `<div class="block"><div class="checklist">${items}</div></div>`;
+    }
+
+    case "quote":
+      return `
+        <div class="quote">
+          <p>&ldquo;${section.text}&rdquo;</p>
+          ${section.attribution ? `<div class="quote-attr">${section.attribution}</div>` : ""}
+        </div>`;
+
+    default:
+      return "";
+  }
+}
+
+function renderStaffDivider(){
+  return `
+    <div class="staff-divider">
+      <svg viewBox="0 0 700 14" preserveAspectRatio="none">
+        <line x1="0" y1="2" x2="700" y2="2"></line>
+        <line x1="0" y1="5" x2="700" y2="5"></line>
+        <line x1="0" y1="8" x2="700" y2="8"></line>
+        <line x1="0" y1="11" x2="700" y2="11"></line>
+      </svg>
+    </div>`;
+}
+
+function renderContent(){
+  const m = MODULES[activeIndex];
+  const done = !!progress.complete[m.id];
+  const content = document.getElementById("content");
+
+  content.innerHTML = `
+    <div class="module-header">
+      <div class="module-eyebrow">Module ${String(activeIndex+1).padStart(2,'0')} of ${MODULES.length}<span class="dot"></span>${m.time}</div>
+      <h1>${m.title}</h1>
+      <p class="module-dek">${m.dek}</p>
+      ${renderStaffDivider()}
+    </div>
+    <div id="sections"></div>
+    <div class="module-footer">
+      <button class="complete-btn ${done?'done':''}" id="completeBtn">
+        ${ICONS.check} ${done ? "Marked complete" : "Mark as complete"}
+      </button>
+      <div class="step-nav">
+        <button class="step-btn" id="prevBtn" ${activeIndex===0?'disabled':''}>${ICONS.arrowLeft} Previous</button>
+        <button class="step-btn" id="nextBtn" ${activeIndex===MODULES.length-1?'disabled':''}>Next ${ICONS.arrowRight}</button>
+      </div>
+    </div>
+  `;
+
+  const sectionsEl = document.getElementById("sections");
+  sectionsEl.innerHTML = m.sections.map((s,i)=>renderSection(s, m.id, i)).join("");
+
+  sectionsEl.querySelectorAll(".checklist-item").forEach(item=>{
+    item.addEventListener("click", ()=>{
+      const key = item.dataset.key;
+      const i = parseInt(item.dataset.i,10);
+      const list = new Set(progress.checklist[key] || []);
+      if(list.has(i)) list.delete(i); else list.add(i);
+      progress.checklist[key] = Array.from(list);
+      saveProgress(progress);
+      renderContent();
+    });
+  });
+
+  document.getElementById("completeBtn").addEventListener("click", ()=>{
+    progress.complete[m.id] = !progress.complete[m.id];
+    saveProgress(progress);
+    renderAll();
+  });
+  document.getElementById("prevBtn").addEventListener("click", ()=>{
+    if(activeIndex>0){ activeIndex--; renderAll(); window.scrollTo({top:0,behavior:"smooth"}); }
+  });
+  document.getElementById("nextBtn").addEventListener("click", ()=>{
+    if(activeIndex<MODULES.length-1){ activeIndex++; renderAll(); window.scrollTo({top:0,behavior:"smooth"}); }
+  });
+}
+
+function renderAll(){
+  renderNav();
+  renderProgressStaff();
+  renderContent();
+}
+
+function collapseSidebar(collapsed){
+  const sidebar = document.getElementById("sidebar");
+  const toggle = document.getElementById("menuToggle");
+  const label = document.getElementById("menuToggleLabel");
+  sidebar.classList.toggle("collapsed", collapsed);
+  toggle.setAttribute("aria-expanded", String(!collapsed));
+  label.textContent = collapsed ? "Show modules" : "Hide modules";
+}
+document.getElementById("menuToggle").addEventListener("click", ()=>{
+  const collapsed = document.getElementById("sidebar").classList.contains("collapsed");
+  collapseSidebar(!collapsed);
+});
+if(window.innerWidth <= 880){ collapseSidebar(true); }
+
+renderAll();
+</script>
+</body>
+</html>
