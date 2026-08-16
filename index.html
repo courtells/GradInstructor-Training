@@ -461,161 +461,283 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
    ================================================================ */
 
 const SITE_SETTINGS = {
-  eyebrow: "TA Onboarding",
-  title: "Music Program\nTraining",
-  subtitle: "A short course for new teaching assistants."
+  "eyebrow": "TA Onboarding",
+  "title": "Music Program\nTraining",
+  "subtitle": "A short course for new teaching assistants."
 };
 
 const MODULES = [
   {
-    id: "welcome",
-    title: "Welcome to the Program",
-    time: "6 min",
-    dek: "What the ensemble program stands for, and where you fit in as a TA.",
-    sections: [
-      { type: "paragraph", text: "Welcome — we're glad you're joining the music program as a teaching assistant. This module covers what the program values, how TAs support the lead instructor, and what a typical week looks like." },
-      { type: "heading", text: "What TAs actually do" },
-      { type: "paragraph", text: "You're not a substitute teacher and you're not just an extra pair of hands. You're the person students feel comfortable asking a 'small' question, the one who notices when someone's struggling with a passage before it becomes a bigger problem, and the one who keeps rehearsal running while the instructor works one-on-one with a section." },
-      { type: "list", style: "bulleted", items: [
-        "Help set up and break down the room before and after class",
-        "Support individual students or small sections during rehearsal",
-        "Take attendance and light notes on progress for the instructor",
-        "Model rehearsal etiquette — you set the tone as much as anyone"
-      ]},
-      { type: "quote", text: "Students remember how a room felt more than what was said in it. Your energy sets the room.", attribution: "— Program handbook, Section 1" },
-      { type: "callout", variant: "tip", label: "Before your first session", text: "Introduce yourself to the lead instructor at least 10 minutes before class and ask how they'd like you to handle latecomers and instrument checkout that day." }
-    ]
-  },
-  {
-    id: "culture",
-    title: "Classroom Culture & Communication",
-    time: "9 min",
-    dek: "How to talk with students, handle mistakes, and keep rehearsal encouraging.",
-    sections: [
-      { type: "paragraph", text: "Music classrooms mix performance pressure with group learning, which means how you communicate matters as much as what you know about the material." },
-      { type: "heading", text: "Giving feedback in the moment" },
-      { type: "paragraph", text: "Keep feedback specific and actionable. 'Try that again' teaches nothing — 'slow down measure 12, your bow is rushing ahead of the beat' gives the student something to fix.\n\nLead with what's working before naming what to adjust. Students are far more likely to try again if the first thing they hear isn't a correction." },
-      { type: "list", style: "ordered", items: [
-        "Name one specific thing that's working",
-        "Name one specific thing to adjust",
-        "Give a concrete way to practice it (slower tempo, isolate the phrase, clap the rhythm)",
-        "Let them try it again right away, while it's fresh"
-      ]},
-      { type: "callout", variant: "warning", label: "Avoid", text: "Comparing students to each other, even lightly ('see how well she's doing it'). It reads as pressure, not encouragement, and it can shut a student down for the rest of class." },
-      { type: "heading", text: "When a student is struggling emotionally" },
-      { type: "paragraph", text: "If a student seems frustrated, embarrassed, or upset, step aside with them quietly rather than addressing it in front of the group. Your job is to de-escalate, not diagnose — loop in the lead instructor if it continues past that session." }
-    ]
-  },
-  {
-    id: "equipment",
-    title: "Instrument & Equipment Care",
-    time: "7 min",
-    dek: "Checkout procedures, storage, and what counts as TA-level maintenance.",
-    sections: [
-      { type: "paragraph", text: "Program instruments are shared across many students and cost real money to repair. Part of your role is protecting them without making students afraid to touch them." },
-      { type: "heading", text: "Checkout & return" },
-      { type: "checklist", items: [
-        "Log the student's name and instrument tag number at checkout",
-        "Do a quick visual check for existing damage before handing it over",
-        "Remind students where cases and stands go at the end of class",
-        "Flag anything that looks damaged before it leaves the room, not after"
-      ]},
-      { type: "heading", text: "What you can fix vs. what to report" },
-      { type: "list", style: "bulleted", items: [
-        "Loose reeds, slipped mutes, or a dropped stand — handle it yourself",
-        "Sticking valves, buzzing strings, or a cracked reed — send the student to the instrument closet, don't attempt a repair",
-        "Anything structural (cracks, bent brass, broken strings mid-class) — report to the lead instructor immediately, don't try to keep using it"
-      ]},
-      { type: "callout", variant: "tip", label: "Good habit", text: "Keep a small notepad or note on your phone of anything you flagged during class, so it doesn't get forgotten by the next session." },
-      { type: "heading", text: "Watch first", level: "secondary" },
-      { type: "video", url: "", caption: "Add a link to your program's instrument care walkthrough here." }
-    ]
-  },
-  {
-    id: "management",
-    title: "Rehearsal & Classroom Management",
-    time: "8 min",
-    dek: "Keeping a room of musicians focused without killing the energy.",
-    sections: [
-      { type: "paragraph", text: "Rehearsal rooms are loud and full of transitions — between pieces, between sections, between full-group and small-group work. Most classroom management here is about smoothing those transitions, not enforcing quiet." },
-      { type: "heading", text: "Getting attention without shouting over instruments" },
-      { type: "list", style: "ordered", items: [
-        "Use the agreed-upon signal (raised hand, played chord, etc.) rather than raising your voice over the group",
-        "Wait for full quiet before giving instructions — repeating yourself over noise trains students to tune you out",
-        "Keep instructions short; long explanations lose a room fast"
-      ]},
-      { type: "heading", text: "Small-group and sectional support" },
-      { type: "paragraph", text: "When the lead instructor sends you off with a section, you're not just supervising — you're actively coaching. Have the section run the passage once so you can hear where the real issue is before jumping in with fixes." },
-      { type: "callout", variant: "tip", label: "Time management", text: "Set a rough time limit for sectional work before you start (e.g. '8 minutes on this passage') so you don't accidentally eat into the full-group rehearsal time." }
-    ]
-  },
-  {
-    id: "assessment",
-    title: "Grading & Feedback Support",
-    time: "6 min",
-    dek: "How TAs support assessment without setting the grading standard.",
-    sections: [
-      { type: "paragraph", text: "You'll often be asked to help with practice logs, playing tests, or written feedback — but the lead instructor sets the standard. Your role is consistent, useful input, not final grades." },
-      { type: "list", style: "bulleted", items: [
-        "Use the rubric provided for the assignment — don't improvise your own criteria",
-        "Write feedback a student could actually act on, not just a score",
-        "Flag anything borderline to the instructor instead of deciding it yourself",
-        "Keep notes factual ('rushed the eighth-note run in m.14') rather than evaluative ('not ready')"
-      ]},
-      { type: "callout", variant: "warning", label: "Stay in your lane", text: "Never change a grade the instructor has already given, even if a student asks you to during class. Direct grade disputes to the instructor." },
-      { type: "quote", text: "Good feedback tells a student what to do next practice session. A number alone never does that.", attribution: "— Program handbook, Section 4" }
-    ]
-  },
-  {
-    id: "safety",
-    title: "Safety, Emergencies & Reporting",
-    time: "10 min",
-    dek: "What to do in an emergency, and how to report concerns properly.",
-    sections: [
-      { type: "paragraph", text: "This is the one module every TA should know cold, even if nothing here ever comes up during your time in the program." },
-      { type: "heading", text: "In an emergency" },
-      { type: "list", style: "ordered", items: [
-        "Student safety comes first — pause rehearsal immediately if needed",
-        "Know the building's evacuation route and the nearest emergency exit before your first session",
-        "Call campus/building security or emergency services if there's any doubt",
-        "Notify the lead instructor and program coordinator as soon as it's safe to do so"
-      ]},
-      { type: "callout", variant: "warning", label: "Mandatory reporting", text: "If a student discloses something involving abuse, self-harm, or safety at home, do not try to handle it yourself. Report it to the lead instructor and program coordinator the same day, following your institution's reporting policy." },
-      { type: "heading", text: "Everyday reporting" },
-      { type: "paragraph", text: "Not everything is an emergency, but most things are worth a note. Minor injuries, equipment damage, a student who seems consistently withdrawn — write it down and pass it along at the end of class rather than letting it go unrecorded." },
-      { type: "checklist", items: [
-        "Know the emergency exit and meeting point for your room",
-        "Save the program coordinator's phone number in your phone",
-        "Know where the first-aid kit is kept",
-        "Review your institution's mandatory reporting policy"
-      ]},
-      { type: "heading", text: "Quick check", level: "secondary" },
-      { type: "quiz",
-        question: "A student tells you, in confidence, that they don't feel safe at home. What do you do?",
-        choices: [
-          "Promise not to tell anyone and try to help them yourself",
-          "Report it to the lead instructor and program coordinator the same day",
-          "Wait and see if they bring it up again next class",
-          "Post about it in the TA group chat to get advice"
-        ],
-        correctIndex: 1,
-        explanation: "This falls under mandatory reporting. Handling it yourself, even with good intentions, can leave a student without the support they need — report it the same day, every time."
+    "id": "welcome",
+    "title": "Welcome to the Program",
+    "time": "6 min",
+    "dek": "An introduction to your work as a graduate instructor.",
+    "sections": [
+      {
+        "type": "paragraph",
+        "text": [
+          "Welcome! We're glad you're joining the music program as a graduate instructor. This training course will give you a brief overview of the School of Music, your responsibilities as an instructor, and tips and tricks to help you give your students a solid course experience.",
+          "This module will give you an introduction to the program and will outline your responsibilities as an instructor."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "The BYU School of Music"
+      },
+      {
+        "type": "paragraph",
+        "text": "The School of Music is home to nearly 500 music majors across disciplines including performance, commercial music, composition, education, and many others. Students perform in the school's choirs, orchestras, concert bands, jazz ensembles, and athletic bands. Undergraduate students take courses in aural skills and sight singing alongside their other required courses; these courses are typically taught by graduate instructors, giving you the opportunity to work directly with students and practice important pedagogical skills as an instructor."
+      },
+      {
+        "type": "heading",
+        "text": "Courses",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": "The aural skills and sight singing courses (as well as their respective number of credits) are listed below. Please review the course description and learning objectives for the course(s) you will be teaching. Reviewing the information for any courses prior to yours in the sequence may also help you understand what concepts students will already know by the time they begin your course."
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 1 (MUSIC 197, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:** This course offers training in the development of aural skills through sight singing, rhythm reading, and improvisation. Emphasis will be on learning solfège, counting syllables, conducting patterns, and hand signs in the performance of diatonic melodies in major and minor keys and basic rhythms in simple and compound meters.",
+          "**Learning Objectives: **",
+          "1. Sight singing: Students will demonstrate the ability to sight-read diatonic melodies that arpeggiate tonic and dominant in any major or minor key.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms with duple divisions, dots, ties, triplets, and duplets in simple and compound meters while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 2 (MUSIC 198, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:** Continued development of aural skills through sight singing, rhythm reading, and improvisation; emphasis on arpeggiated melodies and more advanced rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read diatonic melodies that arpeggiate triads and sevenths in any major or minor key.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms involving sextuple division, syncopation, and less common beat values while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 3 (MUSIC 297, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through sight-singing, rhythm reading, and improvisation. Emphasis will be on modal and chromatic melodies and advanced rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read modal and chromatic melodies.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms involving small subdvisions and cross-rhythms while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 4 (MUSIC 298, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through sight singing, rhythm reading, and improvisation. Emphasis will be on chromatic and modulating melodies and challenging rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read chromatic, modulating, and post-tonal melodies.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform complex rhythms in asymmetrical and changing meters.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "divider",
+        "style": "dots"
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 1 (MUSIC 193, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers training in the development of aural skills through melodic dictation, rhythm dictation, and error detection. Listening materials will include diatonic melodies in major and minor keys and basic rhythms in simple and compound meters.",
+          "**Learning Objectives:**",
+          "1. Melodic dictation: Students will be able to accurately transcribe diatonic melodies that arpeggiate tonic and dominant in major and minor keys.",
+          "2. Rhythmic dictation: Students will be able to accurately transcribe rhythms in simple and compound meters with simple subdivisions, dots, and ties.",
+          "3. Error detection: Students will be able to correctly identify errors in simple melodic and rhythmic excerpts."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 2 (MUSIC 194, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "Continued development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials include longer, arpeggiated melodies, more advanced rhythms, and diatonic harmonic progressions.",
+          "**Learning Objectives:**"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe diatonic melodies that contain large leaps and diatonic arpeggiations.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in diatonic chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe rhythms involving sextuple division, syncopation, and less common beat values.",
+          "Error detection: Students will be able to correctly identify errors in longer melodies, rhythm patterns, and diatonic chord progressions."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 3 (MUSIC 293, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials will include modal and chromatic melodies, more difficult rhythms, and chromatic chord progressions.",
+          "Learning Objectives:"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe modal and chromatic melodies.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in chromatic chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe rhythms involving small subdivisions and irregular divisions.",
+          "Error detection: Students will be able to correctly identify errors in modal and chromatic melodies, advanced rhythm patterns, and chromatic chord progressions."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 4",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description: **",
+          "This course offers continued training in the development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials will include chromatic, modulating, and post-tonal melodies, challenging rhythms, and modulating chord progressions.",
+          "**Learning Objectives:**"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe chromatic, modulating, and post-tonal melodies.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in modulating chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe challenging rhythms in asymmetrical and changing meters.",
+          "Error detection: Students will be able to correctly identify errors in chromatic and modulating melodies, complex rhythm patterns, and modulating chord progressions."
+        ]
       }
     ]
   },
   {
-    id: "final-check",
-    title: "Final Knowledge Check",
-    time: "5 min",
-    dek: "A short form to confirm what you've learned before your first session.",
-    sections: [
-      { type: "paragraph", text: "Nice work getting through the training. Wrap up with the short form below — it takes a few minutes and confirms you're ready for your first session." },
-      { type: "embed",
-        label: "Knowledge Check",
-        url: "",
-        height: 900,
-        showScore: true,
-        scoreEntryId: ""
+    "id": "culture",
+    "title": "Classroom Setup",
+    "time": "9 min",
+    "dek": "Technology, equipment, and instruments to help you teach.",
+    "sections": [
+      {
+        "type": "heading",
+        "text": "Your Classroom",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "You will be assigned a classroom within the music building. Your schedule and room number will be communicated to you from Dr. Y before the semester begins. You can use the map below to find your assigned classroom.",
+          "[INSERT MAP]"
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Equipment"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Every aural skills and sight singing classroom will be equipped with a few different things: a projector, sound system, document camera, whiteboards, and a piano. As an instructor, you will need to bring a device that can stream audio, such as a laptop or phone.",
+          "The whiteboards can be very useful; students can use them to do dictation in various parts of the room, but students should also be allowed to work quietly at their desks on a piece of staff paper. Instructors can also use the whiteboards during class, but using the document camera will generally be better for legibility and visibility. The document camera allows you to zoom in and out as needed, and your penmanship is usually better on a piece of paper.",
+          "You will need a piano key to use the piano in the classroom. Reach out to the School of Music office to obtain one.",
+          "If, for whatever reason, you face technical issues or some of your equipment is missing, reach out to Dr. Y."
+        ]
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "label": "Quick Tip",
+        "text": "It's a good idea to find a time before classes start to practice setting up your equipment and to ensure that your device connects properly to the sound system."
+      },
+      {
+        "type": "heading",
+        "text": "Coming Prepared",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Before you come to class, there are a few things you should check. Dress appropriately for instructing in front of a large group - you don't have to wear professional clothing, but you should wear something clean and presentable. Comfortable shoes are also important as you will spend a great deal of time standing and walking around the classroom.",
+          "As mentioned above, you will need a device for streaming audio. This could be a laptop, phone, or tablet. Be sure to bring any additional cords you need, including a charger.",
+          "You should also bring staff paper, blank paper, pencils, and a colored writing utensil such as a red pen. These will be helpful for you as you work through examples with students."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "module-xw97g8",
+    "title": "Expectations for Instructors",
+    "time": "5 min",
+    "dek": "Add a short summary here.",
+    "sections": [
+      {
+        "type": "heading",
+        "text": "Grading",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": "Each aural skills course will include daily homework, periodic quizzes, and three Listening Exams."
+      },
+      {
+        "type": "heading",
+        "text": "Homework",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": "Students will self-grade their homework at the beginning of each class period, then you will gather the graded homework (or have students take a picture of their work and submit that instead), and then you will add those grades to the gradebook."
+      },
+      {
+        "type": "heading",
+        "text": "Quizzes and Exams",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Quizzes will occur approximately once every two weeks. There will be three total Listening Exams (the last one will serve as the course's final exam). Answer keys will be provided by Dr. Y for each quiz and exam.",
+          "As you grade, follow the answer keys carefully - not every element will always be worth points. Always check your math to ensure accuracy.",
+          "You should aim to have quizzes and exams graded within a week after they are submitted. Although there may be circumstances where another day or two is needed, prompt feedback is important for your students so they know where they need to improve and where their overall grade stands."
+        ]
       }
     ]
   }
