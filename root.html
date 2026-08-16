@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TA Training — Music Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   THEME TOKENS — change colors, fonts, spacing here
+   ============================================================ */
+:root{
+  --navy:        #002E5D;
+  --navy-ink:     #001d3d;   /* darker navy for hover/pressed states */
+  --navy-mist:    #eef2f6;   /* navy tinted background wash */
+  --white:       #ffffff;
+  --grey-50:     #f6f7f8;
+  --grey-100:    #eceef0;
+  --grey-300:    #d4d8dc;
+  --grey-500:    #8a9099;
+  --grey-700:    #4b5158;
+  --black:       #14171a;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --sidebar-w: 300px;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0,20,50,.06), 0 8px 24px -12px rgba(0,20,50,.12);
+}
+
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  color:var(--black);
+  background:var(--grey-50);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ font-family:var(--font-display); margin:0; }
+p{ margin:0; }
+button{ font-family:inherit; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+const SITE_SETTINGS = {
+  "eyebrow": "TA Onboarding",
+  "title": "Music Program\nTraining",
+  "subtitle": "A short course for new teaching assistants."
+};
+
+const MODULES = [
+  {
+    "id": "welcome",
+    "title": "Welcome to the Program",
+    "time": "6 min",
+    "dek": "An introduction to your work as a graduate instructor.",
+    "sections": [
+      {
+        "type": "paragraph",
+        "text": [
+          "Welcome! We're glad you're joining the music program as a graduate instructor. This training course will give you a brief overview of the School of Music, your responsibilities as an instructor, and tips and tricks to help you give your students a solid course experience.",
+          "This module will give you an introduction to the program and will outline your responsibilities as an instructor."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "The BYU School of Music"
+      },
+      {
+        "type": "paragraph",
+        "text": "The School of Music is home to nearly 500 music majors across disciplines including performance, commercial music, composition, education, and many others. Students perform in the school's choirs, orchestras, concert bands, jazz ensembles, and athletic bands. Undergraduate students take courses in aural skills and sight singing alongside their other required courses; these courses are typically taught by graduate instructors, giving you the opportunity to work directly with students and practice important pedagogical skills as an instructor."
+      },
+      {
+        "type": "heading",
+        "text": "Courses",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": "The aural skills and sight singing courses (as well as their respective number of credits) are listed below. Please review the course description and learning objectives for the course(s) you will be teaching. Reviewing the information for any courses prior to yours in the sequence may also help you understand what concepts students will already know by the time they begin your course."
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 1 (MUSIC 197, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:** This course offers training in the development of aural skills through sight singing, rhythm reading, and improvisation. Emphasis will be on learning solfège, counting syllables, conducting patterns, and hand signs in the performance of diatonic melodies in major and minor keys and basic rhythms in simple and compound meters.",
+          "**Learning Objectives: **",
+          "1. Sight singing: Students will demonstrate the ability to sight-read diatonic melodies that arpeggiate tonic and dominant in any major or minor key.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms with duple divisions, dots, ties, triplets, and duplets in simple and compound meters while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 2 (MUSIC 198, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:** Continued development of aural skills through sight singing, rhythm reading, and improvisation; emphasis on arpeggiated melodies and more advanced rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read diatonic melodies that arpeggiate triads and sevenths in any major or minor key.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms involving sextuple division, syncopation, and less common beat values while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 3 (MUSIC 297, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through sight-singing, rhythm reading, and improvisation. Emphasis will be on modal and chromatic melodies and advanced rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read modal and chromatic melodies.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform rhythms involving small subdvisions and cross-rhythms while conducting.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Sight Singing 4 (MUSIC 298, 0.5 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through sight singing, rhythm reading, and improvisation. Emphasis will be on chromatic and modulating melodies and challenging rhythms.",
+          "**Learning Objectives:**",
+          "1. Sight singing: Students will demonstrate the ability to sight-read chromatic, modulating, and post-tonal melodies.",
+          "2. Rhythm reading: Students will demonstrate the ability to accurately perform complex rhythms in asymmetrical and changing meters.",
+          "3. Improvisation: Students will demonstrate the ability to improvise idiomatic melodic and rhythmic patterns in response to a given call."
+        ]
+      },
+      {
+        "type": "divider",
+        "style": "dots"
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 1 (MUSIC 193, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers training in the development of aural skills through melodic dictation, rhythm dictation, and error detection. Listening materials will include diatonic melodies in major and minor keys and basic rhythms in simple and compound meters.",
+          "**Learning Objectives:**",
+          "1. Melodic dictation: Students will be able to accurately transcribe diatonic melodies that arpeggiate tonic and dominant in major and minor keys.",
+          "2. Rhythmic dictation: Students will be able to accurately transcribe rhythms in simple and compound meters with simple subdivisions, dots, and ties.",
+          "3. Error detection: Students will be able to correctly identify errors in simple melodic and rhythmic excerpts."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 2 (MUSIC 194, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "Continued development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials include longer, arpeggiated melodies, more advanced rhythms, and diatonic harmonic progressions.",
+          "**Learning Objectives:**"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe diatonic melodies that contain large leaps and diatonic arpeggiations.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in diatonic chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe rhythms involving sextuple division, syncopation, and less common beat values.",
+          "Error detection: Students will be able to correctly identify errors in longer melodies, rhythm patterns, and diatonic chord progressions."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 3 (MUSIC 293, 1.0 credits)",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description:**",
+          "This course offers continued training in the development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials will include modal and chromatic melodies, more difficult rhythms, and chromatic chord progressions.",
+          "Learning Objectives:"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe modal and chromatic melodies.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in chromatic chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe rhythms involving small subdivisions and irregular divisions.",
+          "Error detection: Students will be able to correctly identify errors in modal and chromatic melodies, advanced rhythm patterns, and chromatic chord progressions."
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Aural Skills 4",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "**Course Description: **",
+          "This course offers continued training in the development of aural skills through melodic dictation, rhythm dictation, harmonic dictation, and error detection. Listening materials will include chromatic, modulating, and post-tonal melodies, challenging rhythms, and modulating chord progressions.",
+          "**Learning Objectives:**"
+        ]
+      },
+      {
+        "type": "list",
+        "style": "ordered",
+        "items": [
+          "Melodic dictation: Students will be able to accurately transcribe chromatic, modulating, and post-tonal melodies.",
+          "Harmonic dictation: Students will be able to accurately transcribe the outer voices and identify the harmonies in modulating chord progressions.",
+          "Rhythmic dictation: Students will be able to accurately transcribe challenging rhythms in asymmetrical and changing meters.",
+          "Error detection: Students will be able to correctly identify errors in chromatic and modulating melodies, complex rhythm patterns, and modulating chord progressions."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "culture",
+    "title": "Classroom Setup",
+    "time": "9 min",
+    "dek": "Technology, equipment, and instruments to help you teach.",
+    "sections": [
+      {
+        "type": "heading",
+        "text": "Your Classroom",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "You will be assigned a classroom within the music building. Your schedule and room number will be communicated to you from Dr. Y before the semester begins. You can use the map below to find your assigned classroom.",
+          "[INSERT MAP]"
+        ]
+      },
+      {
+        "type": "heading",
+        "text": "Equipment"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Every aural skills and sight singing classroom will be equipped with a few different things: a projector, sound system, document camera, whiteboards, and a piano. As an instructor, you will need to bring a device that can stream audio, such as a laptop or phone.",
+          "The whiteboards can be very useful; students can use them to do dictation in various parts of the room, but students should also be allowed to work quietly at their desks on a piece of staff paper. Instructors can also use the whiteboards during class, but using the document camera will generally be better for legibility and visibility. The document camera allows you to zoom in and out as needed, and your penmanship is usually better on a piece of paper.",
+          "You will need a piano key to use the piano in the classroom. Reach out to the School of Music office to obtain one.",
+          "If, for whatever reason, you face technical issues or some of your equipment is missing, reach out to Dr. Y."
+        ]
+      },
+      {
+        "type": "callout",
+        "variant": "tip",
+        "label": "Quick Tip",
+        "text": "It's a good idea to find a time before classes start to practice setting up your equipment and to ensure that your device connects properly to the sound system."
+      },
+      {
+        "type": "heading",
+        "text": "Coming Prepared",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Before you come to class, there are a few things you should check. Dress appropriately for instructing in front of a large group - you don't have to wear professional clothing, but you should wear something clean and presentable. Comfortable shoes are also important as you will spend a great deal of time standing and walking around the classroom.",
+          "As mentioned above, you will need a device for streaming audio. This could be a laptop, phone, or tablet. Be sure to bring any additional cords you need, including a charger.",
+          "You should also bring staff paper, blank paper, pencils, and a colored writing utensil such as a red pen. These will be helpful for you as you work through examples with students."
+        ]
+      }
+    ]
+  },
+  {
+    "id": "module-xw97g8",
+    "title": "Expectations for Instructors",
+    "time": "5 min",
+    "dek": "Add a short summary here.",
+    "sections": [
+      {
+        "type": "heading",
+        "text": "Grading",
+        "level": "primary"
+      },
+      {
+        "type": "paragraph",
+        "text": "Each aural skills course will include daily homework, periodic quizzes, and three Listening Exams."
+      },
+      {
+        "type": "heading",
+        "text": "Homework",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": "Students will self-grade their homework at the beginning of each class period, then you will gather the graded homework (or have students take a picture of their work and submit that instead), and then you will add those grades to the gradebook."
+      },
+      {
+        "type": "heading",
+        "text": "Quizzes and Exams",
+        "level": "secondary"
+      },
+      {
+        "type": "paragraph",
+        "text": [
+          "Quizzes will occur approximately once every two weeks. There will be three total Listening Exams (the last one will serve as the course's final exam). Answer keys will be provided by Dr. Y for each quiz and exam.",
+          "As you grade, follow the answer keys carefully - not every element will always be worth points. Always check your math to ensure accuracy.",
+          "You should aim to have quizzes and exams graded within a week after they are submitted. Although there may be circumstances where another day or two is needed, prompt feedback is important for your students so they know where they need to improve and where their overall grade stands."
+        ]
+      }
+    ]
+  }
+];
