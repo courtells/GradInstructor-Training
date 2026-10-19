@@ -299,6 +299,30 @@ textarea, input, select{ font-family:inherit; }
 .skip-link:focus{ top:8px; }
 
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+/* ---------- links in rich text ---------- */
+.sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+a.md-link{ color:var(--navy); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1.5px; font-weight:500; }
+a.md-link:hover{ color:var(--navy-ink); text-decoration-thickness:2px; }
+
+/* ---------- quiz: per-choice feedback ---------- */
+.quiz-choice.selected-correct{ background:#eaf6ee; }
+.quiz-choice.selected-incorrect{ background:#fdecea; }
+.quiz-edit-choice{ border:1px solid var(--grey-300); border-radius:8px; padding:12px 12px 14px; margin-bottom:10px; background:var(--grey-50); }
+.quiz-edit-choice.is-correct{ border-color:#1e7a37; background:#f3faf5; }
+.quiz-edit-choice-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.quiz-edit-correct{ display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--grey-700); cursor:pointer; }
+.quiz-edit-correct input{ accent-color:var(--navy); }
+.quiz-edit-choice .edit-field-group{ margin-bottom:10px; }
+.quiz-edit-choice .edit-field-group:last-child{ margin-bottom:0; }
+
+/* ---------- HTML block ---------- */
+.html-block-wrap iframe{ display:block; width:100%; border:0; height:120px; background:transparent; }
+.html-edit-preview{ border:1.5px dashed var(--grey-300); border-radius:8px; overflow:hidden; margin-top:6px; background:var(--white); }
+.html-edit-preview iframe{ display:block; width:100%; border:0; height:120px; }
+.html-preview-head{ display:flex; align-items:center; justify-content:space-between; margin-top:16px; }
+.html-preview-head .edit-label{ margin-bottom:0; }
+.edit-code{ font-family:var(--font-mono); font-size:12.5px; line-height:1.55; white-space:pre; overflow-x:auto; tab-size:2; }
+
 </style>
 </head>
 <body>
@@ -425,7 +449,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      { type: "callout", variant: "tip"|"warning", label: "...", text: "..." }
      { type: "checklist", items: ["...", "..."] }
      { type: "quote", text: "...", attribution: "..." }
-     { type: "quiz", question: "...", choices: ["...","..."], correctIndex: 0, explanation: "..." }
+     { type: "quiz", question: "...", choices: ["...","..."], correctIndex: 0,
+       choiceFeedback: ["feedback for choice 1","feedback for choice 2"], explanation: "..." }
+     { type: "html", label: "...", code: "<p>any HTML, CSS, JS</p>", height: "" }  // height blank = auto-fit
      { type: "embed", label: "...", url: "...", height: 900, showScore: true, scoreEntryId: "" }
      { type: "video", url: "...", caption: "..." }     // any YouTube link format works
      { type: "image", url: "...", alt: "...", caption: "..." }   // alt is for accessibility
@@ -434,7 +460,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
    KNOWLEDGE CHECKS
      "quiz" blocks are self-graded multiple-choice questions you can
      drop into any module. correctIndex is zero-based (0 = first
-     choice). Scores across every quiz in the site are tallied
+     choice). choiceFeedback holds one message per choice (same order
+     as choices); the learner sees the message for the choice they
+     picked. "explanation" is optional and shown after any answer. Scores across every quiz in the site are tallied
      automatically and shown in the sidebar and above any "embed"
      block that has showScore left on.
 
@@ -454,8 +482,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      setting — the score will be filled in automatically when the
      form loads.
 
+   HTML BLOCK
+     "html" blocks hold your own HTML/CSS/JavaScript for short
+     interactive elements (flip cards, drag-and-match, mini tools).
+     The code runs inside a sandboxed frame, so it can't affect the
+     rest of the course or see progress/scores, and the course's CSS
+     doesn't leak in. Theme colors are available as CSS variables
+     (var(--navy), var(--navy-mist), var(--grey-300) ...) and a
+     ready-made class="btn" button style. Leave "height" blank and the
+     frame fits its content automatically.
+
    RICH TEXT — inside paragraph, callout, quote, list, and checklist
-   text you can use **bold**, *italic*, and (in paragraph text only)
+   text you can use **bold**, *italic*, [link text](https://url), and (in paragraph text only)
    lines starting with "- " for a bulleted list or "1. " for a
    numbered list within that paragraph block.
    ================================================================ */
@@ -846,11 +884,19 @@ const SECTION_DEFAULTS = {
   callout:   () => ({ type:"callout", variant:"tip", label:"Tip", text:"New callout text." }),
   checklist: () => ({ type:"checklist", items:["First item","Second item"] }),
   quote:     () => ({ type:"quote", text:"New quote text.", attribution:"" }),
-  quiz:      () => ({ type:"quiz", question:"New question", choices:["Choice 1","Choice 2","Choice 3"], correctIndex:0, explanation:"" }),
+  quiz:      () => ({ type:"quiz", question:"New question", choices:["Choice 1","Choice 2","Choice 3"], correctIndex:0, choiceFeedback:["","",""], explanation:"" }),
   embed:     () => ({ type:"embed", label:"Knowledge Check", url:"", height:900, showScore:true, scoreEntryId:"" }),
   video:     () => ({ type:"video", url:"", caption:"" }),
   image:     () => ({ type:"image", url:"", alt:"", caption:"" }),
-  divider:   () => ({ type:"divider", style:"line" })
+  divider:   () => ({ type:"divider", style:"line" }),
+  html:      () => ({ type:"html", label:"Interactive element", height:"", code:
+`<button class="btn" id="demo">Click me</button>
+<p id="out" style="margin-top:12px"></p>
+<script>
+  document.getElementById("demo").addEventListener("click", function(){
+    document.getElementById("out").textContent = "It works! Replace this with your own HTML.";
+  });
+<\/script>` })
 };
 
 function extractYouTubeId(url){
@@ -870,10 +916,35 @@ function extractYouTubeId(url){
 
 /* ---- lightweight rich text: **bold**, *italic*, and (in paragraph
        blocks) "- " / "1. " lines rendered as lists ---- */
+function linkHref(escapedUrl){
+  let u = String(escapedUrl||"").trim();
+  if(/^www\./i.test(u)) u = "https://" + u;
+  // allow web, email, phone, in-page (#) and relative links; refuse any other scheme (javascript:, data:, ...)
+  if(/^[a-z][a-z0-9+.\-]*:/i.test(u) && !/^(https?|mailto|tel):/i.test(u)) return null;
+  return u || null;
+}
 function inlineMD(text){
-  let t = esc(text);
+  let t = esc(text).replace(/[\u0000-\u0003]/g, "");
+  const hrefs = [];
+  // [link text](https://example.com) — tokenised first so * and _ inside URLs are left alone
+  t = t.replace(/\[([^\[\]]+?)\]\(([^)\s]+)\)/g, (m, label, url)=>{
+    const href = linkHref(url);
+    if(!href) return m;
+    hrefs.push(href);
+    const n = hrefs.length - 1;
+    return "\u0000" + n + "\u0001" + label + "\u0002" + n + "\u0003";
+  });
   t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   t = t.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  t = t.replace(/\u0000(\d+)\u0001/g, (m, n)=>{
+    const h = hrefs[+n];
+    return h.charAt(0) === "#"
+      ? `<a class="md-link" href="${h}">`
+      : `<a class="md-link" href="${h}" target="_blank" rel="noopener noreferrer">`;
+  });
+  t = t.replace(/\u0002(\d+)\u0003/g, (m, n)=>{
+    return hrefs[+n].charAt(0) === "#" ? "</a>" : '<span class="sr-only"> (opens in a new tab)</span></a>';
+  });
   return t;
 }
 function renderParagraphBlock(text){
@@ -923,7 +994,7 @@ function renderScoreSummary(){
   const { correct, total } = computeScore();
   if(!total) return "";
   return `<div class="score-summary">
-    <div>Your knowledge check score so far: <strong>${correct}/${total}</strong></div>
+    <div>Your knowledge check score so far: <strong class="score-value">${correct}/${total}</strong></div>
     <button class="pill-btn subtle" type="button" data-action="copy-score">Copy score</button>
   </div>`;
 }
@@ -1064,10 +1135,124 @@ function addModule(){
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
+/* ---------------- HTML block: sandboxed iframe helpers ---------------- */
+const HTML_SANDBOX = "allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals";
+const HTML_BLOCK_CSS = `
+:root{ --navy:#002E5D; --navy-ink:#001d3d; --navy-mist:#eef2f6; --white:#ffffff; --grey-50:#f6f7f8; --grey-100:#eceef0; --grey-300:#d4d8dc; --grey-500:#8a9099; --grey-700:#4b5158; --black:#14171a;
+  --font-display:'Fraunces', Georgia, serif; --font-body:'Inter', -apple-system, sans-serif; --font-mono:'JetBrains Mono', monospace; --radius:10px; }
+*{ box-sizing:border-box; }
+html,body{ background:transparent; }
+body{ margin:0; display:flow-root; font-family:var(--font-body); font-size:15.5px; line-height:1.65; color:#25292e; -webkit-font-smoothing:antialiased; }
+h1,h2,h3,h4{ font-family:var(--font-display); color:var(--navy); margin:0 0 8px; line-height:1.25; }
+p{ margin:0 0 12px; }
+button, input, select, textarea{ font-family:inherit; font-size:inherit; }
+a{ color:var(--navy); }
+.btn{ background:var(--navy); color:var(--white); border:1.5px solid var(--navy); padding:9px 16px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; }
+.btn:hover{ background:var(--navy-ink); }
+.btn.subtle{ background:var(--white); color:var(--navy); }
+.btn.subtle:hover{ background:var(--navy-mist); }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible{ outline:2px solid var(--navy); outline-offset:2px; }
+`;
+function buildHtmlBlockSrcdoc(code, frameId, autoSize){
+  const resizer = autoSize ? `<script>(function(){var id=${JSON.stringify(frameId)},last=0;
+function send(){var h=Math.ceil(document.body.getBoundingClientRect().height);if(h&&h!==last){last=h;parent.postMessage({__htmlBlock:id,height:h},"*");}}
+if(window.ResizeObserver){new ResizeObserver(send).observe(document.body);}
+window.addEventListener("load",send);document.addEventListener("DOMContentLoaded",send);send();})();<\/script>` : "";
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><base target="_blank">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>${HTML_BLOCK_CSS}</style></head><body>${code}${resizer}</body></html>`;
+}
+function setHtmlFrame(frame, section){
+  const fixed = parseInt(section.height,10);
+  const auto = !(fixed > 0);
+  frame.dataset.frameId = uid("hb");
+  frame.dataset.auto = auto ? "1" : "0";
+  frame.style.height = auto ? "120px" : fixed + "px";
+  frame.srcdoc = buildHtmlBlockSrcdoc(String(section.code||""), frame.dataset.frameId, auto);
+}
+window.addEventListener("message", (e)=>{
+  const d = e.data;
+  if(!d || typeof d !== "object" || !d.__htmlBlock) return;
+  const frame = Array.from(document.querySelectorAll("iframe[data-frame-id]")).find(f=>f.dataset.frameId === d.__htmlBlock);
+  if(!frame || frame.contentWindow !== e.source || frame.dataset.auto !== "1") return;
+  frame.style.height = Math.min(Math.max(parseInt(d.height,10) || 0, 20), 4000) + "px";
+});
+
 /* ---------------- view-mode section rendering ---------------- */
 function paragraphParts(text){
   if(Array.isArray(text)) return text;
   return String(text).split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+}
+
+function embedSrc(section){
+  let src = section.url;
+  if(section.scoreEntryId){
+    const { correct, total } = computeScore();
+    const sep = src.includes("?") ? "&" : "?";
+    src = src + sep + encodeURIComponent(section.scoreEntryId) + "=" + encodeURIComponent(correct + "/" + total);
+  }
+  return src;
+}
+
+/* ---- in-place updates: change only the pieces that changed, so HTML blocks,
+       embeds, and scroll position are never reset ---- */
+function refreshScoreViews(){
+  const { correct, total } = computeScore();
+  document.querySelectorAll(".score-value").forEach(el=>{ el.textContent = correct + "/" + total; });
+  // keep a Google Form's pre-filled score current (only touches forms that use a score field)
+  const m = modules[activeIndex];
+  if(!m) return;
+  document.querySelectorAll("iframe[data-embed-idx]").forEach(f=>{
+    const sec = m.sections[parseInt(f.dataset.embedIdx,10)];
+    if(!sec || !sec.scoreEntryId || !sec.url) return;
+    const next = embedSrc(sec);
+    if(f.getAttribute("src") !== next) f.setAttribute("src", next);
+  });
+  updateScoreDisplay();
+}
+function refreshQuizBlock(moduleId, idx, focusSel){
+  const mod = modules.find(mm=>mm.id===moduleId);
+  const section = mod && mod.sections[idx];
+  const key = moduleId + "-" + idx;
+  const old = document.querySelector('.quiz-block[data-quiz-key="' + key + '"]');
+  if(!section || !old) return;
+  const wrap = old.closest(".block");
+  const tmp = document.createElement("div");
+  tmp.innerHTML = renderSectionView(section, moduleId, idx);
+  const fresh = tmp.firstElementChild;
+  wrap.replaceWith(fresh);
+  wireQuizButtons(fresh);
+  refreshScoreViews();
+  const target = focusSel && fresh.querySelector(focusSel);
+  if(target) target.focus({ preventScroll:true });
+}
+function wireQuizButtons(root){
+  root.querySelectorAll('[data-action="quiz-check"]').forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.quizKey;
+      const modId = btn.dataset.module;
+      const secIdx = parseInt(btn.dataset.secIdx,10);
+      const mod = modules.find(mm=>mm.id===modId);
+      const section = mod && mod.sections[secIdx];
+      if(!section) return;
+      const block = btn.closest(".quiz-block");
+      const selectedInput = block.querySelector('input[type="radio"]:checked');
+      if(!selectedInput){ alert("Choose an answer first."); return; }
+      const selected = parseInt(selectedInput.value,10);
+      progress.quizzes[key] = { selected, correct: selected === section.correctIndex };
+      saveProgress();
+      refreshQuizBlock(modId, secIdx, ".quiz-feedback");
+    });
+  });
+  root.querySelectorAll('[data-action="quiz-retry"]').forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const key = btn.dataset.quizKey;
+      const cut = key.lastIndexOf("-");
+      delete progress.quizzes[key];
+      saveProgress();
+      refreshQuizBlock(key.slice(0,cut), parseInt(key.slice(cut+1),10), 'input[type="radio"]');
+    });
+  });
 }
 
 function renderSectionView(section, moduleId, idx){
@@ -1112,11 +1297,15 @@ function renderSectionView(section, moduleId, idx){
       const choicesHtml = (section.choices||[]).map((c,i)=>{
         const checked = answered && answered.selected===i ? "checked" : "";
         const disabled = answered ? "disabled" : "";
-        return `<label class="quiz-choice"><input type="radio" name="quiz-${key}" value="${i}" ${checked} ${disabled}><span>${inlineMD(c)}</span></label>`;
+        const mark = answered && answered.selected===i ? (answered.correct ? " selected-correct" : " selected-incorrect") : "";
+        return `<label class="quiz-choice${mark}"><input type="radio" name="quiz-${key}" value="${i}" ${checked} ${disabled}><span>${inlineMD(c)}</span></label>`;
       }).join("");
-      const feedback = answered
-        ? `<div class="quiz-feedback ${answered.correct?'correct':'incorrect'}">${answered.correct ? "Correct." : "Not quite."}${section.explanation ? " " + inlineMD(section.explanation) : ""}</div>`
-        : "";
+      let feedback = "";
+      if(answered){
+        const perChoice = Array.isArray(section.choiceFeedback) ? (section.choiceFeedback[answered.selected] || "") : "";
+        const msg = [perChoice, section.explanation].filter(x=>x && String(x).trim()).map(inlineMD).join(" ");
+        feedback = `<div class="quiz-feedback ${answered.correct?'correct':'incorrect'}" tabindex="-1" role="status"><strong>${answered.correct ? "Correct." : "Not quite."}</strong>${msg ? " " + msg : ""}</div>`;
+      }
       const actionBtn = answered
         ? `<button class="pill-btn subtle quiz-check-btn" data-action="quiz-retry" data-quiz-key="${key}">Try again</button>`
         : `<button class="pill-btn quiz-check-btn" data-action="quiz-check" data-quiz-key="${key}" data-module="${moduleId}" data-sec-idx="${idx}">Check answer</button>`;
@@ -1131,17 +1320,12 @@ function renderSectionView(section, moduleId, idx){
       if(!section.url){
         return `<div class="block"><div class="callout tip"><span class="callout-icon">${ICONS.tip}</span><div class="callout-body"><div class="callout-label">Embed not set up yet</div><p>Add a Google Form embed URL to this block in Edit mode.</p></div></div></div>`;
       }
-      let src = section.url;
-      if(section.scoreEntryId){
-        const { correct, total } = computeScore();
-        const sep = src.includes("?") ? "&" : "?";
-        src = src + sep + encodeURIComponent(section.scoreEntryId) + "=" + encodeURIComponent(correct + "/" + total);
-      }
+      const src = embedSrc(section);
       const scoreHtml = section.showScore !== false ? renderScoreSummary() : "";
       return `<div class="block">
         ${section.label ? `<h2 class="block-heading">${esc(section.label)}</h2>` : ""}
         ${scoreHtml}
-        <div class="embed-wrap"><iframe src="${esc(src)}" title="${esc(section.label || 'Embedded content')}" height="${parseInt(section.height,10)||900}" loading="lazy">Loading…</iframe></div>
+        <div class="embed-wrap"><iframe data-embed-idx="${idx}" src="${esc(src)}" title="${esc(section.label || 'Embedded content')}" height="${parseInt(section.height,10)||900}" loading="lazy">Loading…</iframe></div>
       </div>`;
     }
     case "video": {
@@ -1163,6 +1347,12 @@ function renderSectionView(section, moduleId, idx){
         <div class="image-wrap"><img src="${esc(section.url)}" alt="${esc(section.alt||"")}" loading="lazy"></div>
         ${section.caption ? `<div class="image-caption">${inlineMD(section.caption)}</div>` : ""}
       </div>`;
+    }
+    case "html": {
+      if(!section.code || !String(section.code).trim()){
+        return `<div class="block"><div class="callout tip"><span class="callout-icon">${ICONS.tip}</span><div class="callout-body"><div class="callout-label">HTML block is empty</div><p>Paste your HTML into this block in Edit mode.</p></div></div></div>`;
+      }
+      return `<div class="block html-block-wrap"><iframe data-html-idx="${idx}" title="${esc(section.label || 'Interactive element')}" sandbox="${HTML_SANDBOX}" loading="lazy"></iframe></div>`;
     }
     case "divider": {
       if(section.style === "staff") return `<div class="block">${renderStaffDivider()}</div>`;
@@ -1205,7 +1395,7 @@ function renderSectionEdit(section, i){
         <label class="edit-label">Paragraph text</label>
         ${richTextToolbar()}
         <textarea class="edit-textarea" data-field="text" rows="4">${esc(paragraphParts(section.text).join("\n\n"))}</textarea>
-        <div class="hint">Leave a blank line for a new paragraph. Start lines with "- " or "1. " for a list.</div>
+        <div class="hint">Leave a blank line for a new paragraph. Start lines with "- " or "1. " for a list. To add a link, select some text and click the link button, or type [link text](https://example.com).</div>
       </div>`;
   } else if(section.type === "list"){
     fields = `
@@ -1258,22 +1448,36 @@ function renderSectionEdit(section, i){
         <input class="edit-input" data-field="attribution" value="${esc(section.attribution)}">
       </div>`;
   } else if(section.type === "quiz"){
+    const choices = section.choices || [];
+    const fbList = Array.isArray(section.choiceFeedback) ? section.choiceFeedback : [];
+    const correct = section.correctIndex || 0;
+    const rows = choices.map((c,j)=>`
+      <div class="quiz-edit-choice ${j===correct?'is-correct':''}" data-choice="${j}">
+        <div class="quiz-edit-choice-head">
+          <label class="quiz-edit-correct"><input type="radio" name="correct-${i}" data-choice-correct="${j}" ${j===correct?'checked':''}> Correct answer</label>
+          <button type="button" class="mini-btn danger" data-action="choice-remove" data-choice="${j}" title="Remove this choice" aria-label="Remove choice ${j+1}" ${choices.length<=2?'disabled':''}>&times;</button>
+        </div>
+        <div class="edit-field-group">
+          <label class="edit-label">Choice ${j+1}</label>
+          <input class="edit-input" data-choice-text="${j}" value="${esc(c)}">
+        </div>
+        <div class="edit-field-group">
+          <label class="edit-label">Feedback shown if learner picks this choice</label>
+          <textarea class="edit-textarea" data-choice-feedback="${j}" rows="2" placeholder="${j===correct?'Why this is right...':'Why this is not right, or what to reconsider...'}">${esc(fbList[j]||"")}</textarea>
+        </div>
+      </div>`).join("");
     fields = `
       <div class="edit-field-group">
         <label class="edit-label">Question</label>
         <textarea class="edit-textarea" data-field="question" rows="2">${esc(section.question)}</textarea>
       </div>
+      <div class="edit-label" style="margin-bottom:8px;">Answer choices &amp; feedback</div>
+      ${rows}
+      <button type="button" class="pill-btn subtle" data-action="choice-add" style="margin-bottom:18px;">+ Add choice</button>
       <div class="edit-field-group">
-        <label class="edit-label">Answer choices (one per line)</label>
-        <textarea class="edit-textarea" data-field="choices" rows="4">${esc((section.choices||[]).join("\n"))}</textarea>
-      </div>
-      <div class="edit-field-group" style="max-width:220px;">
-        <label class="edit-label">Correct choice (line number)</label>
-        <input class="edit-input" type="number" min="1" data-field="correctIndex" value="${(section.correctIndex||0)+1}">
-      </div>
-      <div class="edit-field-group">
-        <label class="edit-label">Explanation shown after answering (optional)</label>
+        <label class="edit-label">General explanation (optional)</label>
         <textarea class="edit-textarea" data-field="explanation" rows="2">${esc(section.explanation||"")}</textarea>
+        <div class="hint">Shown after any answer, following the choice-specific feedback. Leave blank if the feedback above says everything. Feedback supports **bold**, *italic*, and [links](https://example.com).</div>
       </div>`;
   } else if(section.type === "embed"){
     fields = `
@@ -1331,6 +1535,28 @@ function renderSectionEdit(section, i){
         <label class="edit-label">Caption (optional)</label>
         <input class="edit-input" data-field="caption" value="${esc(section.caption||"")}">
       </div>`;
+  } else if(section.type === "html"){
+    fields = `
+      <div class="edit-row">
+        <div class="edit-field-group">
+          <label class="edit-label">Title (read by screen readers)</label>
+          <input class="edit-input" data-field="label" value="${esc(section.label||"")}" placeholder="e.g. Rhythm matching activity">
+        </div>
+        <div class="edit-field-group" style="flex:0 0 150px;">
+          <label class="edit-label">Height (px)</label>
+          <input class="edit-input" type="number" min="0" step="10" data-field="height" value="${parseInt(section.height,10)>0 ? parseInt(section.height,10) : ""}" placeholder="Auto">
+        </div>
+      </div>
+      <div class="edit-field-group">
+        <label class="edit-label">HTML / CSS / JavaScript</label>
+        <textarea class="edit-textarea edit-code" data-field="code" rows="12" wrap="off" spellcheck="false" placeholder="<div>Your interactive element...</div>">${esc(section.code||"")}</textarea>
+        <div class="hint">Runs in an isolated frame, so it can't change the rest of the course or read progress and scores. Use any HTML, CSS, and JavaScript. Theme colors are available as var(--navy), var(--navy-mist), var(--grey-300), etc., and class="btn" gives a course-style button. Leave Height blank to fit the content automatically.</div>
+      </div>
+      <div class="html-preview-head">
+        <span class="edit-label">Live preview</span>
+        <button type="button" class="pill-btn subtle" data-action="html-reload">Reload preview</button>
+      </div>
+      <div class="html-edit-preview"><iframe data-html-idx="${i}" title="Preview of HTML block" sandbox="${HTML_SANDBOX}"></iframe></div>`;
   } else if(section.type === "divider"){
     fields = `
       <div class="edit-field-group">
@@ -1365,6 +1591,7 @@ function richTextToolbar(){
       <button type="button" data-cmd="italic" title="Italic" aria-label="Italic">I</button>
       <button type="button" data-cmd="ul" title="Bulleted list" aria-label="Bulleted list">&bull;</button>
       <button type="button" data-cmd="ol" title="Numbered list" aria-label="Numbered list">1.</button>
+      <button type="button" data-cmd="link" title="Insert link" aria-label="Insert link"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
     </div>`;
 }
 
@@ -1399,9 +1626,27 @@ function prefixLines(textarea, prefixFn){
   textarea.dispatchEvent(new Event("input", { bubbles:true }));
 }
 
+function insertLink(textarea){
+  const start = textarea.selectionStart, end = textarea.selectionEnd;
+  let label = textarea.value.slice(start,end).replace(/[\[\]]/g,"");
+  const url = prompt("Link address (for example https://example.com):", "https://");
+  if(!url || !url.trim() || url.trim() === "https://") return;
+  if(!label.trim()){
+    label = (prompt("Text to show for the link:", "") || "").replace(/[\[\]]/g,"");
+    if(!label.trim()) return;
+  }
+  const clean = url.trim().replace(/\s+/g,"").replace(/\)/g,"%29");
+  const md = "[" + label + "](" + clean + ")";
+  textarea.value = textarea.value.slice(0,start) + md + textarea.value.slice(end);
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = start + md.length;
+  textarea.dispatchEvent(new Event("input", { bubbles:true }));
+}
+
 function applyRichTextCmd(textarea, cmd){
   if(cmd === "bold") wrapSelection(textarea, "**", "**");
   else if(cmd === "italic") wrapSelection(textarea, "*", "*");
+  else if(cmd === "link") insertLink(textarea);
   else if(cmd === "ul") prefixLines(textarea, (l)=> "- " + l.trim().replace(/^[-*]\s+/, ""));
   else if(cmd === "ol") prefixLines(textarea, (l,n)=> n + ". " + l.trim().replace(/^\d+\.\s+/, ""));
 }
@@ -1414,6 +1659,9 @@ function applySectionField(section, field, value){
     section.text = parts.length>1 ? parts : (parts[0]||"");
   } else if(field === "correctIndex"){
     section.correctIndex = Math.max(0, (parseInt(value,10)||1) - 1);
+  } else if(field === "height" && section.type === "html"){
+    const n = parseInt(value,10);
+    section.height = n > 0 ? n : "";
   } else if(field === "height"){
     section.height = parseInt(value,10) || 900;
   } else if(field === "showScore"){
@@ -1503,6 +1751,7 @@ function renderContent(){
             <option value="quote">Quote</option>
             <option value="quiz">Knowledge check (quiz)</option>
             <option value="embed">Embed (e.g. Google Form)</option>
+            <option value="html">HTML block (interactive element)</option>
             <option value="video">Video (YouTube)</option>
             <option value="image">Image</option>
             <option value="divider">Divider</option>
@@ -1523,6 +1772,11 @@ function renderContent(){
     </div>`;
 
   content.innerHTML = bannerHtml + headerHtml + sectionsHtml + footerHtml;
+
+  content.querySelectorAll("iframe[data-html-idx]").forEach(frame=>{
+    const sec = m.sections[parseInt(frame.dataset.htmlIdx,10)];
+    if(sec) setHtmlFrame(frame, sec);
+  });
 
   if(editMode){
     wireFieldLabels(content);
@@ -1546,6 +1800,46 @@ function renderContent(){
           saveModules();
         });
       });
+      const sec = m.sections[i];
+      if(sec.type === "quiz"){
+        const ensureFb = ()=>{
+          if(!Array.isArray(sec.choiceFeedback)) sec.choiceFeedback = [];
+          while(sec.choiceFeedback.length < sec.choices.length) sec.choiceFeedback.push("");
+        };
+        blockEl.querySelectorAll("[data-choice-text]").forEach(el=>el.addEventListener("input", ()=>{
+          sec.choices[parseInt(el.dataset.choiceText,10)] = el.value; saveModules();
+        }));
+        blockEl.querySelectorAll("[data-choice-feedback]").forEach(el=>el.addEventListener("input", ()=>{
+          ensureFb(); sec.choiceFeedback[parseInt(el.dataset.choiceFeedback,10)] = el.value; saveModules();
+        }));
+        blockEl.querySelectorAll("[data-choice-correct]").forEach(el=>el.addEventListener("change", ()=>{
+          sec.correctIndex = parseInt(el.dataset.choiceCorrect,10); saveModules();
+          blockEl.querySelectorAll(".quiz-edit-choice").forEach(row=>row.classList.toggle("is-correct", parseInt(row.dataset.choice,10) === sec.correctIndex));
+        }));
+        blockEl.querySelectorAll('[data-action="choice-remove"]').forEach(btn=>btn.addEventListener("click", ()=>{
+          const j = parseInt(btn.dataset.choice,10);
+          if(sec.choices.length <= 2) return;
+          ensureFb();
+          sec.choices.splice(j,1);
+          sec.choiceFeedback.splice(j,1);
+          if(j < sec.correctIndex) sec.correctIndex--;
+          else if(j === sec.correctIndex) sec.correctIndex = 0;
+          saveModules(); renderContent();
+        }));
+        blockEl.querySelectorAll('[data-action="choice-add"]').forEach(btn=>btn.addEventListener("click", ()=>{
+          ensureFb();
+          sec.choices.push("New choice");
+          sec.choiceFeedback.push("");
+          saveModules(); renderContent();
+        }));
+      }
+      if(sec.type === "html"){
+        const prev = blockEl.querySelector("iframe[data-html-idx]");
+        let timer;
+        const refresh = ()=>{ clearTimeout(timer); timer = setTimeout(()=>setHtmlFrame(prev, sec), 500); };
+        blockEl.querySelectorAll('[data-field="code"], [data-field="height"]').forEach(el=>el.addEventListener("input", refresh));
+        blockEl.querySelectorAll('[data-action="html-reload"]').forEach(btn=>btn.addEventListener("click", ()=>setHtmlFrame(prev, sec)));
+      }
       blockEl.querySelectorAll('[data-action="block-up"]').forEach(btn=>btn.addEventListener("click", ()=>moveSection(i,-1)));
       blockEl.querySelectorAll('[data-action="block-down"]').forEach(btn=>btn.addEventListener("click", ()=>moveSection(i,1)));
       blockEl.querySelectorAll('[data-action="block-delete"]').forEach(btn=>btn.addEventListener("click", ()=>deleteSection(i)));
@@ -1576,35 +1870,15 @@ function renderContent(){
         if(box.checked) list.add(i); else list.delete(i);
         progress.checklist[key] = Array.from(list);
         saveProgress();
-        renderContent();
+        const row = box.closest(".checklist-item");
+        if(row){
+          row.classList.toggle("checked", box.checked);
+          const visual = row.querySelector(".checklist-box");
+          if(visual) visual.classList.toggle("checked", box.checked);
+        }
       });
     });
-    content.querySelectorAll('[data-action="quiz-check"]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const key = btn.dataset.quizKey;
-        const modId = btn.dataset.module;
-        const secIdx = parseInt(btn.dataset.secIdx,10);
-        const mod = modules.find(mm=>mm.id===modId);
-        const section = mod && mod.sections[secIdx];
-        if(!section) return;
-        const block = btn.closest(".quiz-block");
-        const selectedInput = block.querySelector('input[type="radio"]:checked');
-        if(!selectedInput){ alert("Choose an answer first."); return; }
-        const selected = parseInt(selectedInput.value,10);
-        progress.quizzes[key] = { selected, correct: selected === section.correctIndex };
-        saveProgress();
-        renderContent();
-        updateScoreDisplay();
-      });
-    });
-    content.querySelectorAll('[data-action="quiz-retry"]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        delete progress.quizzes[btn.dataset.quizKey];
-        saveProgress();
-        renderContent();
-        updateScoreDisplay();
-      });
-    });
+    wireQuizButtons(content);
     content.querySelectorAll('[data-action="copy-score"]').forEach(btn=>{
       btn.addEventListener("click", ()=>{
         const { correct, total } = computeScore();
@@ -1619,7 +1893,12 @@ function renderContent(){
     if(completeBtn) completeBtn.addEventListener("click", ()=>{
       progress.complete[m.id] = !progress.complete[m.id];
       saveProgress();
-      renderAll();
+      // update in place: refresh only the sidebar, progress staff, and this button
+      const nowDone = !!progress.complete[m.id];
+      completeBtn.classList.toggle("done", nowDone);
+      completeBtn.innerHTML = ICONS.check + " " + (nowDone ? "Marked complete" : "Mark as complete");
+      renderNav();
+      renderProgressStaff();
     });
     const prevBtn = document.getElementById("prevBtn");
     if(prevBtn) prevBtn.addEventListener("click", ()=>{ if(activeIndex>0){ activeIndex--; renderAll(); window.scrollTo({top:0,behavior:"smooth"}); } });
@@ -1679,7 +1958,9 @@ function hideModal(overlayId){
 
 /* ---------------- export modal ---------------- */
 function openExportModal(){
-  const code = "const SITE_SETTINGS = " + JSON.stringify(siteSettings, null, 2) + ";\n\nconst MODULES = " + JSON.stringify(modules, null, 2) + ";";
+  let code = "const SITE_SETTINGS = " + JSON.stringify(siteSettings, null, 2) + ";\n\nconst MODULES = " + JSON.stringify(modules, null, 2) + ";";
+  // HTML blocks can contain <script> tags; escape them so the exported code is safe to paste inside this file's own <script> section
+  code = code.replace(/<\//g, "<\\/").replace(/<!--/g, "\\u003c!--");
   document.getElementById("exportTextarea").value = code;
   showModal("exportOverlay", "exportCloseBtn");
 }
